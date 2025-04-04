@@ -1,0 +1,62 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.Order>
+@{
+    ViewData["Title"] = "Mes ventes";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+    int vendorId = ViewBag.VendorId;
+}
+<a asp-controller="Home" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<h2 class="mb-4">Mes ventes</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Vous n'avez encore effectué aucune vente.
+    </div>
+}
+else
+{
+    foreach (var order in Model)
+    {
+        decimal totalCommande = order.Items
+            .Where(i => i.Product.SellerId == vendorId)
+            .Sum(i => i.Quantity * i.UnitPrice);
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Commande #@order.Id</strong> – @order.OrderDate.ToString("dd MMM yyyy")
+            </div>
+            <div class="card-body">
+                <p><strong>Client :</strong> @order.User.Name.Firstname @order.User.Name.Lastname (<em>@order.User.Email</em>)</p>
+                <table class="table table-sm">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantité</th>
+                            <th>Prix unitaire</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.Items.Where(i => i.Product.SellerId == vendorId))
+                        {
+                            <tr>
+                                <td>@item.Product.Title</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("C")</td>
+                                <td>@(item.Quantity * item.UnitPrice)</td>
+                            </tr>
+                        }
+                        <tr class="table-dark">
+                            <td colspan="3" class="text-end"><strong>Total de la commande :</strong></td>
+                            <td><strong>@totalCommande.ToString("C")</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

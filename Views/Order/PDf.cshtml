@@ -1,0 +1,45 @@
+﻿@model INF27523_TP1_ML_SS.Models.Invoice
+@{
+    Layout = null; // ont ne veux pas de layout defini ici
+}
+
+<!-- Ont affiche la facture avec la date, le total, le numero de la commande associe et le client-->
+<h1 style="text-align:center;">Facture #@Model.Id</h1>
+<p><strong>Date :</strong> @Model.InvoiceDate.ToString("dd MMM yyyy")</p>
+<p><strong>Total :</strong> @Model.Amount.ToString("C")</p>
+<p><strong>Commande # :</strong> @Model.Order.Id</p>
+<p><strong>Client :</strong> @Model.Order.User.Name.Firstname @Model.Order.User.Name.Lastname</p>
+
+@{
+    var vendeurs = Model.Order.Items
+        .Select(i => i.Product.Seller)
+        .Where(s => s != null)
+        .Distinct()
+        .ToList();
+}
+<!-- Finalement le ou les vendeurs des produits-->
+<p><strong>Vendeur(s) :</strong> @string.Join(", ", vendeurs.Select(v => v!.Name.Firstname + " " + v.Name.Lastname))</p>
+
+<table style="width:100%; border-collapse: collapse; margin-top: 20px;" border="1" cellpadding="8">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Description</th>
+            <th>Quantité</th>
+            <th>Prix</th>
+            <th>Vendu par</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Order.Items)
+        {
+            <tr>
+                <td>@item.Product.Title</td>
+                <td>@item.Product.Description</td>
+                <td>@item.Quantity</td>
+                <td>@(item.UnitPrice.ToString("C"))</td>
+                <td>@item.Product.Seller?.Name.Firstname @item.Product.Seller?.Name.Lastname</td>
+            </tr>
+        }
+    </tbody>
+</table>

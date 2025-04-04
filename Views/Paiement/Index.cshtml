@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Paiement";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+    var publishableKey = Context.RequestServices.GetService<IConfiguration>()?["Stripe:PublishableKey"];
+}
+
+<div class="container mt-5 text-center">
+    <h2 class="mb-4">Paiement Stripe</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Error"]</div>
+    }
+    <!-- Bouton Payer maintenant -->
+    <button id="checkout-button" class="btn btn-success btn-lg"> 
+         Payer maintenant
+    </button>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('@publishableKey');
+
+    document.getElementById("checkout-button").addEventListener("click", function () {
+        fetch("/Paiement/CreateCheckoutSession", {
+            method: "POST"
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Erreur lors de la création de la session Stripe");
+            return response.json();
+        })
+        .then(session => {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .catch(error => {
+            alert("Erreur Stripe : " + error.message);
+            console.error("Erreur Stripe:", error);
+        });
+    });
+</script>

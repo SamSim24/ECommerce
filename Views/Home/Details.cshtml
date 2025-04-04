@@ -1,0 +1,70 @@
+﻿@model INF27523_TP1_ML_SS.Models.Product
+@{
+    ViewData["Title"] = "Détails du Produit";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+<a asp-controller="Home" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="row">
+        <div class="col-md-5 d-flex justify-content-center me-4">
+            <img src="@Model.Image" alt="@Model.Title" class="img-fluid" style="max-width: 300px;">
+        </div>
+
+        <div class="col-md-6 d-flex flex-column justify-content-center">
+            <h2>@Model.Title</h2>
+            <p>@Model.Description</p>
+            <p><strong>Prix :</strong> @Model.Price $</p>
+            <p><strong>Note :</strong> @Model.Rating.Rate ⭐ (@Model.Rating.Count avis)</p>
+
+            <button class="btn btn-primary w-100 text-white"
+                    onclick="event.preventDefault(); addToCart(@Model.Id, '@Model.Title', @Model.Price, '@Model.Image', this);">
+                Ajouter au Panier
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function addToCart(productId, title, price, image, button) {
+            fetch('/Panier/AjouterAuPanier', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    title: title,
+                    price: price,
+                    image: image
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'ajout au panier');
+                }
+                return response.json();
+            })
+            .then(data => {
+                button.classList.remove("btn-primary");
+                button.classList.add("btn-success", "text-white");
+                button.innerHTML = "✔ Ajouté";
+                button.addEventListener("mouseleave", function resetButton() {
+                    button.classList.remove("btn-success");
+                    button.classList.add("btn-primary");
+                    button.innerHTML = "Ajouter au Panier";
+                    button.removeEventListener("mouseleave", resetButton);
+                });
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        }
+    </script>
+}

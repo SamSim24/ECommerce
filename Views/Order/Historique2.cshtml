@@ -1,0 +1,49 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.Order>
+@{
+    ViewData["Title"] = "Mes ventes";
+    int vendorId = ViewBag.VendorId;
+}
+
+<h2 class="mb-4">Mes ventes</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Vous n'avez encore effectué aucune vente.
+    </div>
+}
+else
+{
+    foreach (var order in Model)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Commande #@order.Id</strong> – @order.OrderDate.ToString("dd MMM yyyy")
+            </div>
+            <div class="card-body">
+                <p><strong>Client :</strong> @order.User.Name.Firstname @order.User.Name.Lastname (<em>@order.User.Email</em>)</p>
+                <table class="table table-sm">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantité</th>
+                            <th>Prix unitaire</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.Items.Where(i => i.Product.SellerId == vendorId))
+                        {
+                            <tr>
+                                <td>@item.Product.Title</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("C")</td>
+                                <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

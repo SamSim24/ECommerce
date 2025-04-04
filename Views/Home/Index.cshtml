@@ -1,0 +1,125 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.Product>
+@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    .product-card-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -15px;
+    }
+
+    .product-card-wrapper {
+        padding: 0 15px;
+        width: 33.3333%;
+        box-sizing: border-box;
+        margin-bottom: 30px;
+    }
+
+    .product-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .product-card img {
+            height: 200px;
+            object-fit: contain;
+            width: 100%;
+        }
+
+    .btn-add-to-cart {
+        margin-top: auto;
+    }
+</style>
+
+@{
+    var userId = Context.Session.GetInt32("UserId");
+}
+
+@if (userId == 10)
+{
+    <div class="mb-3 text-end">
+        <a asp-controller="Product" asp-action="Create" class="btn btn-success">
+            + Ajouter un produit
+        </a>
+    </div>
+}
+@if (userId != null)
+{
+    <div class="text-center mt-5">
+        <h4> Accès rapide</h4>
+        <a class="btn btn-outline-primary m-2" asp-controller="Order" asp-action="Index">
+             Mes commandes
+        </a>
+        <a class="btn btn-outline-secondary m-2" asp-controller="Invoice" asp-action="Index">
+             Mes factures
+        </a>
+    </div>
+}
+
+<div class="container">
+    <h1 class="text-center my-4">Produits Disponibles</h1>
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <a asp-controller="Home" asp-action="Details" asp-route-id="@product.Id" style="text-decoration: none; color: inherit;">
+                    <div class="card shadow-sm h-100">
+                        <img src="@product.Image" class="card-img-top" alt="@product.Title" style="height: 200px; object-fit: contain;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Title</h5>
+                            @if (product.Rating != null)
+                            {
+                                <p class="card-text">Note : @product.Rating.Rate ⭐ (@product.Rating.Count avis)</p>
+                            }
+                            <p class="card-text">Prix : <strong>@product.Price $</strong></p>
+                            <button class="btn btn-primary w-100 text-white mt-auto"
+                                    onclick="event.preventDefault(); addToCart(@product.Id, '@product.Title', @product.Price, '@product.Image', this);">
+                                Ajouter au Panier
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script>
+    function addToCart(productId, title, price, image, button) {
+        fetch('/Panier/AjouterAuPanier', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId,
+                title: title,
+                price: price,
+                image: image
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur lors de l\'ajout au panier');
+            }
+            return response.json();
+        })
+        .then(data => {
+            button.classList.remove("btn-primary");
+            button.classList.add("btn-success", "text-white");
+            button.innerHTML = "✔ Ajouté";
+            button.addEventListener("mouseleave", function resetButton() {
+                button.classList.remove("btn-success");
+                button.classList.add("btn-primary");
+                button.innerHTML = "Ajouter au Panier";
+                button.removeEventListener("mouseleave", resetButton);
+            });
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+</script>

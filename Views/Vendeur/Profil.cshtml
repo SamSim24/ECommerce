@@ -1,0 +1,37 @@
+@model List<INF27523_TP1_ML_SS.Models.Product>
+@{
+    ViewData["Title"] = "Profil Vendeur";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+    var revenus = ViewBag.RevenusTotaux ?? 0;
+}
+<a asp-controller="Home" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<h2>Profil Vendeur</h2>
+<!-- Ont affiche le total des revenus-->
+<p><strong>Total des revenus :</strong> @revenus $</p>
+<!-- Ont affiche les produits associe au vendeur-->
+<h3>Vos produits en vente :</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Titre</th>
+            <th>Prix</th>
+            <th>Catégorie</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var produit in Model)
+    {
+        <tr>
+            <td><img src="@produit.Image" alt="@produit.Title" width="50" /></td>
+            <td>@produit.Title</td>
+            <td>@produit.Price $</td>
+            <td>@produit.Category</td>
+        </tr>
+    }
+    </tbody>
+</table>

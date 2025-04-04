@@ -1,0 +1,54 @@
+﻿@model INF27523_TP1_ML_SS.Models.Invoice
+@{
+    ViewData["Title"] = "Détails de la facture";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+<a asp-controller="Invoice" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<h2 class="mb-4">Facture #@Model.Id</h2>
+
+<p><strong>Date :</strong> @Model.InvoiceDate.ToString("dd MMM yyyy")</p>
+<p><strong>Total :</strong> @Model.Amount.ToString("C")</p>
+<p><strong>Commande # :</strong> @Model.Order.Id</p>
+
+<p><strong>Client :</strong> @Model.Order.User.Name.Firstname @Model.Order.User.Name.Lastname</p>
+
+@{ // Ont recherhce les vendeurs et ont veux le meme vendeur afficher uniquement une fois (distinct)
+    var vendeurs = Model.Order.Items
+        .Select(i => i.Product.Seller?.Username)
+        .Where(username => !string.IsNullOrEmpty(username))
+        .Distinct()
+        .ToList();
+}
+
+<p><strong>Vendeur(s) :</strong> @string.Join(", ", vendeurs)</p>
+
+<!-- Ont place le tout dans un tableau avec le produit, la quantite, le prix, le vendeur-->
+<h4 class="mt-4">Produits</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Vendeur</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Order.Items)
+        {
+            <tr>
+                <td>@item.Product.Title</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@item.Product.Seller?.Username</td>
+            </tr>
+        }
+        <a asp-action="ExportToPdf" asp-route-id="@Model.Id" class="btn btn-danger mt-3">
+            Exporter la facture en PDF
+        </a>
+    </tbody>
+</table>

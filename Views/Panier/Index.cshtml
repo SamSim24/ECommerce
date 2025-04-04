@@ -1,0 +1,105 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.CartItem>
+@{
+    ViewData["Title"] = "Mon Panier";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+    var stripeKey = Context.RequestServices.GetService<IConfiguration>()?.GetValue<string>("Stripe:PublishableKey");
+}
+<h1>🛒 Mon Panier</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Produit</th>
+            <th>Prix Unitaire</th>
+            <th>Quantité</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-product-id="@item.ProductId">
+                <td class="align-middle"><img src="@item.Image" alt="@item.Title" width="50"></td>
+                <td class="align-middle">@item.Title</td>
+                <td class="align-middle">@item.Price $</td>
+                <td class="align-middle quantite-produit">@item.Quantity</td>
+                <td class="align-middle total-ligne">@(item.Price * item.Quantity) $</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-danger btn-sm supprimer-produit" data-product-id="@item.ProductId">
+                        <span class="fas fa-trash"></span>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Total: <span id="total-panier">@ViewBag.Total</span> $</h3>
+
+<div class="d-flex justify-content-end gap-3 mt-3">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Retourner aux achats</a>
+    <button id="checkout-button" class="btn btn-success btn-lg" @(Model.Count == 0 ? "disabled" : "")>
+         Payer avec Stripe
+    </button>
+</div>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('@stripeKey');
+
+        document.getElementById("checkout-button").addEventListener("click", function () {
+            fetch("/Paiement/CreateCheckoutSession", {
+                method: "POST"
+            })
+            .then(response => response.json())
+            .then(session => {
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .catch(error => {
+                alert("Erreur Stripe : " + error.message);
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            function updateTotal() {
+                var total = 0;
+                $('.total-ligne').each(function () {
+                    total += parseFloat($(this).text());
+                });
+                $('#total-panier').text(total.toFixed(2));
+            }
+
+            $('.supprimer-produit').on('click', function () {
+                var productId = $(this).data('product-id');
+                var ligneTableau = $(this).closest('tr');
+
+                $.ajax({
+                    url: '@Url.Action("ReduceQuantity", "Panier")',
+                    type: 'POST',
+                    data: { productId: productId },
+                    success: function (result) {
+                        if (result.success) {
+                            if (result.removeItem) {
+                                ligneTableau.remove();
+                            } else {
+                                ligneTableau.find('.quantite-produit').text(result.newQuantity);
+                                ligneTableau.find('.total-ligne').text(result.newItemTotal.toFixed(2) + ' $');
+                            }
+                            updateTotal();
+                        } else {
+                            alert(result.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Erreur lors de la mise à jour du produit');
+                    }
+                });
+            });
+        });
+    </script>
+}

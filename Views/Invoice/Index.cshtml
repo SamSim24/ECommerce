@@ -1,0 +1,47 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.Invoice>
+@{
+    ViewData["Title"] = "Mes factures";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+<a asp-controller="Home" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<h2 class="mb-4">Mes factures</h2>
+<!-- Aucune facture -->
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">Vous n'avez aucune facture pour le moment.</div>
+}
+else
+{
+    // afficher chaque facture dans un tableau rempli par le numero de la facture, la datem le montant et le nombre ditem
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Nombre d'articles</th>
+                <th>Détails</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model)
+            {
+                <tr>
+                    <td>@invoice.Id</td>
+                    <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                    <td>@invoice.Amount.ToString("C")</td>
+                    <td>@invoice.Order.Items.Sum(item => item.Quantity)</td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@invoice.Id">
+                            Voir
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

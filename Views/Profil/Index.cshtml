@@ -1,0 +1,83 @@
+﻿@model User
+@{
+    ViewData["Title"] = "Profil";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+
+@if (Model.EstVendeur)
+{
+    <hr />
+    <h4> Produits en vente</h4>
+    <ul class="list-group mb-3">
+        @foreach (var produit in (List<Product>)ViewBag.Produits)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@produit.Title</span>
+                <span>@produit.Price.ToString("0.00") $</span>
+            </li>
+        }
+    </ul>
+
+    <div class="alert alert-info">
+         Ventes totales : <strong>@ViewBag.TotalVentes.ToString("0.00") $</strong>
+    </div>
+}
+
+
+<div class="container my-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-center bg-primary text-white">
+            <h2>Votre Profil</h2>
+        </div>
+        <div class="d-flex gap-3 mt-2">
+            <a class="btn btn-outline-primary" asp-controller="Order" asp-action="Index">
+                 Voir mes commandes
+            </a>
+            <a class="btn btn-outline-secondary" asp-controller="Invoice" asp-action="Index">
+                 Voir mes factures
+            </a>
+        </div>
+        <div class="card-body">
+            <form id="profilForm" method="post" asp-action="ModifierProfil">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label for="firstname" class="form-label">Prénom</label>
+                    <input type="text" class="form-control" id="firstname" asp-for="Name.Firstname" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Nom</label>
+                    <input type="text" class="form-control" id="lastname" asp-for="Name.Lastname" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adresse courriel</label>
+                    <input type="email" class="form-control" id="email" asp-for="Email" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="username" asp-for="Username" disabled />
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" id="editButton" class="btn btn-primary w-30">Modifier</button>
+                    <button type="submit" id="saveButton" class="btn btn-success w-30" style="display:none;">Confirmer</button>
+                    <a asp-action="Deconnexion" class="btn btn-danger w-30">Déconnexion</a>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("editButton").addEventListener("click", function() {
+        let inputs = document.querySelectorAll("#profilForm input");
+        inputs.forEach(input => input.removeAttribute("disabled"));
+
+        document.getElementById("editButton").style.display = "none";
+        document.getElementById("saveButton").style.display = "inline-block";
+    });
+</script>

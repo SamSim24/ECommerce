@@ -1,0 +1,47 @@
+﻿@model List<INF27523_TP1_ML_SS.Models.Order>
+@{
+    ViewData["Title"] = "Historique de Commandes";
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+<a asp-controller="Home" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center"> Historique de vos Commandes</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">Vous n'avez pas encore passé de commande.</div>
+    }
+    else
+    {
+        foreach (var commande in Model)
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Commande #@commande.Id</span>
+                    <span class="text-muted">@commande.OrderDate.ToString("dd MMM yyyy")</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var item in commande.Items)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@item.Product.Title × @item.Quantity</span>
+                                <span>@(item.UnitPrice * item.Quantity)$</span>
+                            </li>
+                        }
+                        
+                        <a asp-action="Details" asp-route-id="@commande.Id" class="btn btn-sm btn-outline-primary ms-2">Voir</a>
+                    </ul>
+                    <hr />
+                    <div class="text-end fw-bold">
+                        Total : @commande.TotalAmount $
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

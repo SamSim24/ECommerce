@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - INF27523_TP1_ML_SS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/INF27523_TP1_ML_SS.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+</head>
+<body class="bg-light">
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">ECommerceSSML</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Parcourir les produits</a>
+                        </li>
+                    </ul>
+
+                    <!-- Barre de recherche et filtre -->
+                    <form class="d-flex" id="searchForm">
+                        <input class="form-control me-2" type="search" name="search" id="searchInput"
+                               placeholder="Rechercher un produit..." value="@ViewBag.Search" />
+                        <select class="form-select me-2" name="category" id="categorySelect">
+                            <option value="">Toutes les catégories</option>
+                            @if (ViewBag.Categories != null)
+                            {
+                                foreach (var cat in ViewBag.Categories)
+                                {
+                                    <option value="@cat" selected="@(ViewBag.SelectedCategory == cat ? "selected" : null)">
+                                        @cat
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </form>
+
+                    <!-- Liens utilisateurs connectés -->
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+
+                        @if (Context.Session.GetInt32("UserId") == 10 || Context.Session.GetInt32("EstVendeur") == 1)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Vendeur" asp-action="Profil"> Mon profil vendeur</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Vendeur" asp-action="Historique"> Mes ventes</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <a asp-controller="Panier" asp-action="Index" class="nav-link">
+                        <img src="~/images/panier.png" alt="Panier" width="30" height="30">
+                    </a>
+
+                    <a asp-controller="Profil" asp-action="Index" class="btn btn-outline-dark rounded-circle ms-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        <main role="main" class="pb-3">
+            <div id="productList">
+                @RenderBody() 
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            let searchInput = $("#searchInput");
+            let categorySelect = $("#categorySelect");
+            let productList = $("#productList");
+
+            function fetchProducts() {
+                $.ajax({
+                    url: "@Url.Action("Index", "Home")",
+                    type: "GET",
+                    data: {
+                        search: searchInput.val(),
+                        category: categorySelect.val()
+                    },
+                    success: function (response) {
+                        let html = $(response).find("#productList").html(); 
+                        productList.html(html);
+                    }
+                });
+            }
+
+            let timer;
+            searchInput.on("input", function () {
+                clearTimeout(timer);
+                timer = setTimeout(fetchProducts, 500); 
+            });
+
+            categorySelect.on("change", function () {
+                fetchProducts();
+            });
+        });
+    </script>
+
+</body>
+</html>

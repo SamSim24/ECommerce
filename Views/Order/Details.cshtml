@@ -1,0 +1,53 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutWithoutFilter.cshtml";
+}
+@model INF27523_TP1_ML_SS.Models.Order
+<a asp-controller="Order" asp-action="Index"
+   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center mt-3"
+   style="width: 40px; height: 40px; padding: 0;">
+    <i class="bi bi-arrow-left"></i>
+</a>
+<h2>Détails de la commande #@Model.Id</h2>
+<p>Date: @Model.OrderDate.ToString("dd MMM yyyy")</p>
+<p>Total: <strong>@Model.TotalAmount $</strong></p>
+
+<!-- Construction d'un tableau avec Produit,Quantite,Prix Unitaire, Sous-Total -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Sous-total</th>
+            <th>Vendeur</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Product.Title</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice $</td>
+                <td>@(item.Quantity * item.UnitPrice) $</td>
+                <td>
+                    @item.Product.Seller?.Username
+                    (@item.Product.Seller?.Name.Firstname @item.Product.Seller?.Name.Lastname)
+                </td>
+            </tr>
+        }
+        @{
+            // verifier si vendeur, si oui peux exporter la commande en pdf.
+            var isVendeur = Context.Session.GetInt32("EstVendeur") == 1;
+        }
+
+        @if (isVendeur)
+        {
+            <a asp-action="ExportToPdf" asp-route-id="@Model.Id" class="btn btn-danger mt-3">
+                 Exporter la commande en PDF
+            </a>
+        }
+
+
+    </tbody>
+</table>
